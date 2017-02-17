@@ -11,8 +11,7 @@ SRC=$(wildcard *.cc)
 OBJ=$(SRC:%.cc=%.o)
 EXE=$(SRC:%.cc=exec/%)
 
-all: $(EXE) exec/motb
-     $(EXE) exec/schedparam
+all: $(EXE) exec/motb exec/schedparam
 
 .PHONY: .FORCE
 
@@ -39,12 +38,10 @@ exec/schedparam: .FORCE
 	@echo creating $@
 	@mkdir -p exec
 	@echo > $@
-	@echo "mingranularity: 4" >> $@
+	@echo "mingranularity 4" >> $@
 	@echo >> $@
-	@echo -n "epochlen: 20 " >> $@
-	@date >> $@
+	@echo -n "epochlen 20" >> $@
 	@echo >> $@
-
 
 echo:
 	@echo SRC: $(SRC)
@@ -58,7 +55,9 @@ clean:
 vclean: clean
 	rm -f Makefile.dep
 
+
 dep depend Makefile.dep:
 	$(CXX) -MM $(CXXFLAGS) $(SRC) > Makefile.dep
+
 
 -include Makefile.dep

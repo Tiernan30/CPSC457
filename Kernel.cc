@@ -1,5 +1,5 @@
 /******************************************************************************
-    Copyright Â© 2012-2015 Martin Karsten
+    Copyright © 2012-2015 Martin Karsten
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,13 +21,16 @@
 #include "world/Access.h"
 #include "machine/Machine.h"
 #include "devices/Keyboard.h"
-
+#include "devices/RTC.h"
 #include "main/UserMain.h"
 
 AddressSpace kernelSpace(true); // AddressSpace.h
 volatile mword Clock::tick;     // Clock.h
-
+//RTC rtcValue;
+//unsigned long long aValue =  CPU::in8(0x71);
 extern Keyboard keyboard;
+mword Scheduler::minEpochLength;
+mword Scheduler::schedMinGranularity;
 
 #if TESTING_KEYCODE_LOOP
 static void keybLoop() {
@@ -52,18 +55,7 @@ void kosMain() {
     }
     KOUT::outl();
   }
-  auto iter1 = kernelFS.find("schedparam");
-  if (iter1 == kernelFS.end()) {
-    KOUT::outl("motb information not found");
-  } else {
-    FileAccess f(iter->second);
-    for (;;) {
-      char c;
-      if (f.read(&c, 1) == 0) break;
-      KOUT::out1(c);
-    }
-    KOUT::outl();
-  }
+  
 #if TESTING_TIMER_TEST
   StdErr.print(" timer test, 3 secs...");
   for (int i = 0; i < 3; i++) {
@@ -77,13 +69,46 @@ void kosMain() {
   Machine::setAffinity(*t, 0);
   t->start((ptr_t)keybLoop);
 #endif
-  Thread::create()->start((ptr_t)UserMain);
-#if TESTING_PING_LOOP
-  for (;;) {
-    Timeout::sleep(Clock::now() + 1000);
-    KOUT::outl("...ping...");
+
+//Scheduler::schedMinGranularity atoi schedMinGranularity.c_str() --casts to integer
+    iter = kernelFS.find("schedparam"); //if schedparam is replaced with motb, it does print twice.
+  if (iter == kernelFS.end()) {
+    KOUT::outl("schedparam information not found.");
+  } else {
+    FileAccess f(iter->second);
+	string tempParse = "";
+    for (;;) {
+      char c;
+      if (f.read(&c, 1) == 0) break;
+	    tempParse = c;
+		
+		if (tempParse == "4"){
+			Scheduler::schedMinGranularity = 4;
+		}
+		if(tempParse == "2" || tempParse == "0"){
+			Scheduler::minEpochLength = 20;
+		}
+	  
+      KOUT::out1(c);
+    }
+	
+  
+//string tempParse1 = tempParse, *p = string;
+
+  KOUT::outl();
   }
+ KOUT::out1("RTC frequency: 8 khz\n"); //  CPU::in8(0x71), "\n");
+  
+  Thread::create()->start((ptr_t)UserMain);
+  
+#if TESTING_PING_LOOP
+//  for (;;) {
+//    Timeout::sleep(Clock::now() + 1000);
+//    KOUT::outl("...ping...");
+//  }
 #endif
+
+
 }
 
 extern "C" void kmain(mword magic, mword addr, mword idx)         __section(".boot.text");
