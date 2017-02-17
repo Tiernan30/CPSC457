@@ -29,7 +29,7 @@ volatile mword Clock::tick;     // Clock.h
 //RTC rtcValue;
 //unsigned long long aValue =  CPU::in8(0x71);
 extern Keyboard keyboard;
-mword Scheduler::minEpochLength;
+mword Scheduler::defaultEpochLength;
 mword Scheduler::schedMinGranularity;
 
 #if TESTING_KEYCODE_LOOP
@@ -86,14 +86,14 @@ void kosMain() {
 			Scheduler::schedMinGranularity = 4;
 		}
 		if(tempParse == "2" || tempParse == "0"){
-			Scheduler::minEpochLength = 20;
+			Scheduler::defaultEpochLength = 20;
 		}
 	  
       KOUT::out1(c);
     }
 	
   
-//string tempParse1 = tempParse, *p = string;
+
 
   KOUT::outl();
   }
@@ -101,11 +101,12 @@ void kosMain() {
   
   Thread::create()->start((ptr_t)UserMain);
   
+  
 #if TESTING_PING_LOOP
-//  for (;;) {
-//    Timeout::sleep(Clock::now() + 1000);
-//    KOUT::outl("...ping...");
-//  }
+  for (;;) {
+    Timeout::sleep(Clock::now() + 1000);
+    KOUT::outl("...ping...");
+  }
 #endif
 
 

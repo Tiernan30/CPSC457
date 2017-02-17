@@ -20,7 +20,6 @@
 #include "generic/EmbeddedContainers.h"
 #include "runtime/Runtime.h"
 
-class Tree;
 class Thread;
 
 class Scheduler {
@@ -56,11 +55,13 @@ public:
   void suspend(BasicLock& lk1, BasicLock& lk2);
   void terminate() __noreturn;
     //static long variables for the epoch
-   //Declare a tree
-  Tree<ThreadNode> *readyTree;
   static mword schedMinGranularity;
   mword epochLength;
-  static mword minEpochLength;
+  static mword defaultEpochLength;
+  mword minVRuntime;
+  mword vRuntime;
+   
+
 };
 
 #endif /* _Scheduler_h_ */
